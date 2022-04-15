@@ -1,8 +1,9 @@
 import json
+import os
 import re
-import tarfile
 from datetime import datetime
-from glob import glob
+from os.path import basename
+from zipfile import ZipFile
 
 from git import Repo, exc
 
@@ -60,7 +61,7 @@ def git_push():
 
 # getting info and parsing it
 def ip_parser(value):
-    if re.search('/tcp|/udp', value):
+    if re.search('/http|/https|/tcp|/udp', value):
         ip = value.split()[0]
         ports = re.search('\((.*?)\)', value).group(1)
         ip_list[ip] = ports
@@ -68,24 +69,24 @@ def ip_parser(value):
 
 def ip_data_fulfill():
     for k, v in ip_list.items():
-        if "80/tcp" in v:
+        if "80/http" in v:
             target = 'http://' + k + ':80'
             HttpData.append(target)
             target = 'tcp://' + k + ':80'
             TcpData80.append(target)
-        if "443/tcp" in v:
+        if "443/https" in v:
             target = 'https://' + k + ':443'
             HttpsIpData.append(target)
             target = 'tcp://' + k + ':443'
             TcpData443.append(target)
-        if v not in ("80/tcp", "443/tcp"):
+        if v not in ("80/http", "443/https"):
             v = v.split(',')
             for item in v:
-                if item.lstrip() != '80/tcp' and item.lstrip() != '443/tcp' and "/udp" not in item.lstrip():
+                if item.lstrip() != '80/http' and item.lstrip() != '443/https' and "/udp" not in item.lstrip():
                     target = 'tcp://' + k + ':' + item.lstrip().split('/')[0]
                     TcpOtherData.append(target)
         for item in v:
-            check_udp = re.split('\W+', item)
+            check_udp = re.split('\W+',item)
             if 'udp' in check_udp:
                 for item in v:
                     if '/tcp' not in item.lstrip() and "/udp" in item.lstrip():
@@ -94,9 +95,9 @@ def ip_data_fulfill():
 
 
 def http_data_fulfil(value):
-    if "https" in value:
+    if "https://" in value:
         HttpsData.append(value)
-    elif "http" in value:
+    elif "http://" in value:
         HttpData.append(value)
 
 
@@ -107,9 +108,9 @@ def get_data():
         if 'message' in item.keys():
             message_text = item['message'].splitlines()
             for value in message_text:
-                if "/tcp" in value or "/udp" in value:
+                if "/http" in value or "/udp" in value or '/https' in value or '/tcp' in value:
                     ip_parser(value.lstrip().rstrip())
-                if 'http' in value or 'https' in value:
+                if 'http://' in value or 'https://' in value:
                     if 'disbalancer' in value or 'chng.it' in value or 'change.org' in value or 'ddosukraine' in value:
                         continue
                     http_data_fulfil(value.lstrip().rstrip())
@@ -140,15 +141,19 @@ def join_data():
 
 
 # creating backups
+def FilesInDir(dirName, file_name, filter):
+    with ZipFile(file_name, 'w') as zipObj:
+        for folderName, subfolders, filenames in os.walk(dirName):
+            for filename in filenames:
+                if filter(filename):
+                    file_path = os.path.join(folderName, filename)
+                    zipObj.write(file_path, basename(file_path))
+
+
 def create_backup():
-    file_name = 'target_before_' + datetime.now().strftime("%m_%h_%Y_%H-%M-%S") + '.tar.gz'
-    print('*** Creating Archive Of Targets Lists Before update ***')
-    get_files = glob('*.lst')
-    archive = tarfile.open(file_name, "w:gz")
-    for item in get_files:
-        archive.add(item, arcname=item)
-    archive.close()
-    print('*** Done ***')
+    file_name = 'target_before_' + datetime.now().strftime("%m_%h_%Y_%H-%M-%S") + '.zip'
+    print('*** Creating A Zip Archive Of Targets Lists Before update ***')
+    FilesInDir('./', file_name, lambda name: '.lst' in name)
 
 
 if __name__ == '__main__':
@@ -156,9 +161,9 @@ if __name__ == '__main__':
     print_repository(repo)
     print(
         f'\n\ntcp 80: {*TcpData80,}\n\ntcp 443: {*TcpData443,}\n\ntcp other: {*TcpOtherData,}\n\nhttp: {*HttpData,}\n\nhttps: {*HttpsData,}\n\nhttpsIp: {*HttpsIpData,}\n\n{*UdpData,}')
+    create_backup()
     check_push = input('\npush to git? y/n\n')
     if check_push.lower() == "y":
-        create_backup()
         create_file(TcpData80, 'l4_tcp_80.lst', 'w')  # put desired name and data
         create_file(TcpData443, 'l4_tcp_443.lst', 'w')  # put desired name and data
         create_file(TcpOtherData, 'l4_tcp_other.lst', 'w')  # put desired name and data
