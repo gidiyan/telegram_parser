@@ -69,20 +69,20 @@ def ip_parser(value):
 
 def ip_data_fulfill():
     for k, v in ip_list.items():
-        if "80/http" in v:
+        if "80/http" in v or '80/tcp' in v:
             target = 'http://' + k + ':80'
             HttpData.append(target)
             target = 'tcp://' + k + ':80'
             TcpData80.append(target)
-        if "443/https" in v:
+        if "443/https" in v or '443/tcp' in v:
             target = 'https://' + k + ':443'
             HttpsIpData.append(target)
             target = 'tcp://' + k + ':443'
             TcpData443.append(target)
-        if v not in ("80/http", "443/https"):
+        if v not in ("80/http", "443/https") and v not in ("80/tcp", "443/tcp"):
             v = v.split(',')
             for item in v:
-                if item.lstrip() != '80/http' and item.lstrip() != '443/https' and "/udp" not in item.lstrip():
+                if item.lstrip() != '80/http' and item.lstrip() != '443/https' and item.lstrip() != '80/tcp' and item.lstrip() != '443/tcp' and "/udp" not in item.lstrip():
                     target = 'tcp://' + k + ':' + item.lstrip().split('/')[0]
                     TcpOtherData.append(target)
         for item in v:
