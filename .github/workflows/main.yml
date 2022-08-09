@@ -43,10 +43,12 @@ jobs:
           exit-code: '1'
           format: 'template'
           template: '@/contrib/html.tpl'
-          output: 'trivy-results.sarif'
+          output: 'trivy-results.html'
           severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
 
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
+      - name: upload report to artifacts
+        uses: actions/upload-artifact@v3
+        if: always()
         with:
-          sarif_file: 'trivy-results.sarif'
+          name: trivy-results
+          path: trivy-results.html
