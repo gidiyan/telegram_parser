@@ -40,11 +40,11 @@ jobs:
           ignore-unfixed: true
           security-checks: vuln,secret,config
           format: 'table'
-          debug: true
-          output: 'trivy-results.sarif'
+          debug: '1'
+#           output: 'trivy-results.sarif'
           severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
 
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: 'trivy-results.sarif'
+#       - name: Upload Trivy scan results to GitHub Security tab
+#         uses: github/codeql-action/upload-sarif@v2
+#         with:
+#           sarif_file: 'trivy-results.sarif'
