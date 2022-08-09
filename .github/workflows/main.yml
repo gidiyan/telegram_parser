@@ -33,15 +33,17 @@ jobs:
 #         uses: github/codeql-action/autobuild@v2
 #       - name: Perform CodeQL Analysis
 #         uses: github/codeql-action/analyze@v2
-      - name: Run Trivy vulnerability scanner in repo mode
+      - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
+        if: always()
         with:
           scan-type: 'fs'
           ignore-unfixed: true
           security-checks: vuln,secret,config
+          exit-code: '1'
           format: 'table'
-          debug: '1'
-#           output: 'trivy-results.sarif'
+          template: '@/contrib/html.tpl'
+          output: 'trivy-results.sarif'
           severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
 
 #       - name: Upload Trivy scan results to GitHub Security tab
